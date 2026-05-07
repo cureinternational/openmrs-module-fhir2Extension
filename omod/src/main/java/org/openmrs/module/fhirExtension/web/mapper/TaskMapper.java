@@ -25,8 +25,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -86,6 +88,26 @@ public class TaskMapper {
 			task.setFhirTaskRequestedPeriod(fhirTaskRequestedPeriod);
 		}
 		
+		if (taskRequest.getObservationUuid() != null) {
+			FhirReference focusReference = new FhirReference();
+			focusReference.setType("Observation");
+			focusReference.setReference("Observation/" + taskRequest.getObservationUuid());
+			focusReference.setTargetUuid(taskRequest.getObservationUuid());
+			fhirTask.setFocusReference(focusReference);
+		}
+
+		if (taskRequest.getOrderUuid() != null) {
+			FhirReference orderReference = new FhirReference();
+			orderReference.setType("ServiceRequest");
+			orderReference.setReference("ServiceRequest/" + taskRequest.getOrderUuid());
+			orderReference.setTargetUuid(taskRequest.getOrderUuid());
+			Set<FhirReference> basedOnRefs = fhirTask.getBasedOnReferences() != null
+			        ? fhirTask.getBasedOnReferences()
+			        : new HashSet<>();
+			basedOnRefs.add(orderReference);
+			fhirTask.setBasedOnReferences(basedOnRefs);
+		}
+
 		if (taskRequest.getIsSystemGeneratedTask()) {
 			fhirTask.setCreator(Context.getUserService().getUserByUuid(Daemon.getDaemonUserUuid()));
 		}
@@ -100,13 +122,18 @@ public class TaskMapper {
 		response.setStatus(task.getFhirTask().getStatus());
 		response.setIntent(task.getFhirTask().getIntent());
 		response.setPatientUuid(task.getFhirTask().getForReference().getTargetUuid());
-		response.setRequestedStartTime(task.getFhirTaskRequestedPeriod().getRequestedStartTime());
-		response.setRequestedEndTime(task.getFhirTaskRequestedPeriod().getRequestedEndTime());
+		if (task.getFhirTaskRequestedPeriod() != null) {
+			response.setRequestedStartTime(task.getFhirTaskRequestedPeriod().getRequestedStartTime());
+			response.setRequestedEndTime(task.getFhirTaskRequestedPeriod().getRequestedEndTime());
+		}
 		response.setCreator(ConversionUtil.convertToRepresentation(task.getFhirTask().getCreator(), Representation.REF));
 		response.setTaskType(ConversionUtil.convertToRepresentation(task.getFhirTask().getTaskCode(), Representation.REF));
 		response.setExecutionStartTime(task.getFhirTask().getExecutionStartTime());
 		response.setExecutionEndTime(task.getFhirTask().getExecutionEndTime());
 		response.setComment(task.getFhirTask().getComment());
+		if (task.getFhirTask().getFocusReference() != null) {
+			response.setObservationUuid(task.getFhirTask().getFocusReference().getTargetUuid());
+		}
 		return response;
 	}
 	

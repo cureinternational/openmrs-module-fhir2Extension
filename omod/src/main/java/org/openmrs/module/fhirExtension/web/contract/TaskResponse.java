@@ -38,4 +38,6 @@ public class TaskResponse {
 	private Date executionEndTime;
 	
 	private String comment;
+	
+	private String observationUuid;
 }

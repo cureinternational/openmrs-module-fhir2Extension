@@ -34,4 +34,8 @@ public class TaskRequest {
 	
 	private Boolean isSystemGeneratedTask = false;
 	
+	private String observationUuid;
+	
+	private String orderUuid;
+	
 }

@@ -68,8 +68,14 @@ public class TaskController extends BaseRestController {
 	public ResponseEntity<Object> getTasks(@RequestParam(value = "startTime") Long startTime,
 										   @RequestParam(value = "endTime") Long endTime,
 										   @RequestParam(value = "visitUuid", required = false) String visitUuid,
-										   @RequestParam(value = "patientUuids", required = false) List<String> patientUuids) throws IOException {
+										   @RequestParam(value = "patientUuids", required = false) List<String> patientUuids,
+										   @RequestParam(value = "observationUuids", required = false) List<String> observationUuids) throws IOException {
 		try {
+			if (observationUuids != null && !observationUuids.isEmpty()) {
+				List<Task> tasks = taskService.getTasksByObservationUuids(observationUuids).stream()
+				        .map(fhirTask -> new Task(fhirTask, null)).collect(Collectors.toList());
+				return new ResponseEntity<>(tasks.stream().map(taskMapper::constructResponse).collect(Collectors.toList()), HttpStatus.OK);
+			}
 			if (visitUuid != null && !visitUuid.isEmpty()) {
 				List<Task> tasks = taskService.getTasksByVisitFilteredByTimeFrame(visitUuid, new Date(startTime), new Date(endTime));
 				return new ResponseEntity<>(tasks.stream().map(taskMapper::constructResponse).collect(Collectors.toList()), HttpStatus.OK);
