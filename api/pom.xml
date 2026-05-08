@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.bahmni.module</groupId>
         <artifactId>fhir2Extension</artifactId>
-        <version>1.4.0</version>
+        <version>1.4.0.ipd-SNAPSHOT</version>
     </parent>
 
     <artifactId>fhir2Extension-api</artifactId>
