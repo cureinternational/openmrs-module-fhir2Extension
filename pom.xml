@@ -81,7 +81,7 @@
 			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 		<repository>
-			<id>github-fhir2</id>
+			<id>github</id>
 			<name>GitHub Packages - openmrs-module-fhir2</name>
 			<url>https://maven.pkg.github.com/cureinternational/openmrs-module-fhir2</url>
 			<snapshots>
