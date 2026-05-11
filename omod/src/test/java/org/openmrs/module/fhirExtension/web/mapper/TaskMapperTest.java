@@ -6,8 +6,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.VisitService;
@@ -53,7 +53,7 @@ public class TaskMapperTest {
 		
 		FhirReference focusRef = task.getFhirTask().getFocusReference();
 		assertNotNull(focusRef);
-		assertEquals(Obs.class.getTypeName(), focusRef.getType());
+		assertEquals(FhirConstants.OBSERVATION, focusRef.getType());
 		assertEquals(OBSERVATION_UUID, focusRef.getReference());
 		assertEquals(OBSERVATION_UUID, focusRef.getTargetUuid());
 	}
