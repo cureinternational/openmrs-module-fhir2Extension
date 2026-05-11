@@ -279,18 +279,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>0.7.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<publishingServerId>nexus-sonatype</publishingServerId>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-		</plugins>
 	</build>
 
 
