@@ -39,6 +39,11 @@
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/cureinternational/openmrs-module-fhir2Extension</url>
 		</repository>
+		<snapshotRepository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/cureinternational/openmrs-module-fhir2Extension</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<modules>
