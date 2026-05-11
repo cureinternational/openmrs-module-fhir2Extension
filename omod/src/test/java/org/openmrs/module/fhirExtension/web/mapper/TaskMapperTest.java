@@ -51,8 +51,8 @@ public class TaskMapperTest {
 		
 		FhirReference focusRef = task.getFhirTask().getFocusReference();
 		assertNotNull(focusRef);
-		assertEquals("Observation", focusRef.getType());
-		assertEquals("Observation/" + OBSERVATION_UUID, focusRef.getReference());
+		assertEquals("org.openmrs.Obs", focusRef.getType());
+		assertEquals(OBSERVATION_UUID, focusRef.getReference());
 		assertEquals(OBSERVATION_UUID, focusRef.getTargetUuid());
 	}
 	

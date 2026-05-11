@@ -80,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public List<FhirTask> getTasksByObservationUuids(List<String> observationUuids) {
 		ReferenceOrListParam orList = new ReferenceOrListParam();
-		observationUuids.forEach(uuid -> orList.add(new ReferenceParam("Observation", null, uuid)));
+		observationUuids.forEach(uuid -> orList.add(new ReferenceParam("org.openmrs.Obs", null, uuid)));
 		ReferenceAndListParam focusParam = new ReferenceAndListParam().addAnd(orList);
 		SearchParameterMap searchMap = new SearchParameterMap()
 		        .addParameter(FhirConstants.FOCUS_REFERENCE_SEARCH_HANDLER, focusParam);

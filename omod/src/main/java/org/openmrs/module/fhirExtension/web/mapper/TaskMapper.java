@@ -90,8 +90,8 @@ public class TaskMapper {
 		
 		if (taskRequest.getObservationUuid() != null) {
 			FhirReference focusReference = new FhirReference();
-			focusReference.setType("Observation");
-			focusReference.setReference("Observation/" + taskRequest.getObservationUuid());
+			focusReference.setType("org.openmrs.Obs");
+			focusReference.setReference(taskRequest.getObservationUuid());
 			focusReference.setTargetUuid(taskRequest.getObservationUuid());
 			fhirTask.setFocusReference(focusReference);
 		}
