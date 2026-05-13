@@ -34,8 +34,8 @@ public class TaskRequest {
 	
 	private Boolean isSystemGeneratedTask = false;
 	
-	private String observationUuid;
+	private TaskFhirReference focus;
 	
-	private String orderUuid;
+	private TaskFhirReference basedOn;
 	
 }

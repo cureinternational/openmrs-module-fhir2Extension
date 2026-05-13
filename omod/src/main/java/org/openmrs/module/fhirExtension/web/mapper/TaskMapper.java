@@ -8,11 +8,11 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.Daemon;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.model.FhirReference;
 import org.openmrs.module.fhir2.model.FhirTask;
 import org.openmrs.module.fhirExtension.model.FhirTaskRequestedPeriod;
 import org.openmrs.module.fhirExtension.model.Task;
+import org.openmrs.module.fhirExtension.web.contract.TaskFhirReference;
 import org.openmrs.module.fhirExtension.web.contract.TaskRequest;
 import org.openmrs.module.fhirExtension.web.contract.TaskResponse;
 import org.openmrs.module.fhirExtension.web.contract.TaskUpdateRequest;
@@ -89,23 +89,23 @@ public class TaskMapper {
 			task.setFhirTaskRequestedPeriod(fhirTaskRequestedPeriod);
 		}
 		
-		if (taskRequest.getObservationUuid() != null) {
+		if (taskRequest.getFocus() != null) {
 			FhirReference focusReference = new FhirReference();
-			focusReference.setType(FhirConstants.OBSERVATION);
-			focusReference.setReference(taskRequest.getObservationUuid());
-			focusReference.setTargetUuid(taskRequest.getObservationUuid());
+			focusReference.setType(taskRequest.getFocus().getType());
+			focusReference.setReference(taskRequest.getFocus().getReference());
+			focusReference.setTargetUuid(taskRequest.getFocus().getReference());
 			fhirTask.setFocusReference(focusReference);
 		}
 
-		if (taskRequest.getOrderUuid() != null) {
-			FhirReference orderReference = new FhirReference();
-			orderReference.setType(Order.class.getTypeName());
-			orderReference.setReference(taskRequest.getOrderUuid());
-			orderReference.setTargetUuid(taskRequest.getOrderUuid());
+		if (taskRequest.getBasedOn() != null) {
+			FhirReference basedOnReference = new FhirReference();
+			basedOnReference.setType(taskRequest.getBasedOn().getType());
+			basedOnReference.setReference(taskRequest.getBasedOn().getReference());
+			basedOnReference.setTargetUuid(taskRequest.getBasedOn().getReference());
 			Set<FhirReference> basedOnRefs = fhirTask.getBasedOnReferences() != null
 			        ? fhirTask.getBasedOnReferences()
 			        : new HashSet<>();
-			basedOnRefs.add(orderReference);
+			basedOnRefs.add(basedOnReference);
 			fhirTask.setBasedOnReferences(basedOnRefs);
 		}
 
@@ -133,7 +133,10 @@ public class TaskMapper {
 		response.setExecutionEndTime(task.getFhirTask().getExecutionEndTime());
 		response.setComment(task.getFhirTask().getComment());
 		if (task.getFhirTask().getFocusReference() != null) {
-			response.setObservationUuid(task.getFhirTask().getFocusReference().getTargetUuid());
+			TaskFhirReference focus = new TaskFhirReference();
+			focus.setReference(task.getFhirTask().getFocusReference().getTargetUuid());
+			focus.setType(task.getFhirTask().getFocusReference().getType());
+			response.setFocus(focus);
 		}
 		return response;
 	}

@@ -39,5 +39,5 @@ public class TaskResponse {
 	
 	private String comment;
 	
-	private String observationUuid;
+	private TaskFhirReference focus;
 }

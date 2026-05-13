@@ -6,8 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Order;
-import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhirExtension.web.contract.TaskFhirReference;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.VisitService;
@@ -44,22 +43,25 @@ public class TaskMapperTest {
 	private static final String ORDER_UUID = "order-uuid-5678";
 	
 	@Test
-	public void fromRequest_shouldSetFocusReferenceWhenObservationUuidProvided() {
+	public void fromRequest_shouldSetFocusReferenceWhenFocusProvided() {
 		TaskRequest request = new TaskRequest();
-		request.setObservationUuid(OBSERVATION_UUID);
+		TaskFhirReference focus = new TaskFhirReference();
+		focus.setType("Observation");
+		focus.setReference(OBSERVATION_UUID);
+		request.setFocus(focus);
 		request.setIsSystemGeneratedTask(false);
 		
 		Task task = taskMapper.fromRequest(request);
 		
 		FhirReference focusRef = task.getFhirTask().getFocusReference();
 		assertNotNull(focusRef);
-		assertEquals(FhirConstants.OBSERVATION, focusRef.getType());
+		assertEquals("Observation", focusRef.getType());
 		assertEquals(OBSERVATION_UUID, focusRef.getReference());
 		assertEquals(OBSERVATION_UUID, focusRef.getTargetUuid());
 	}
 	
 	@Test
-	public void fromRequest_shouldNotSetFocusReferenceWhenObservationUuidAbsent() {
+	public void fromRequest_shouldNotSetFocusReferenceWhenFocusAbsent() {
 		TaskRequest request = new TaskRequest();
 		request.setIsSystemGeneratedTask(false);
 		
@@ -69,9 +71,12 @@ public class TaskMapperTest {
 	}
 	
 	@Test
-	public void fromRequest_shouldAddOrderUuidToBasedOnReferences() {
+	public void fromRequest_shouldAddBasedOnReference() {
 		TaskRequest request = new TaskRequest();
-		request.setOrderUuid(ORDER_UUID);
+		TaskFhirReference basedOn = new TaskFhirReference();
+		basedOn.setType("ServiceRequest");
+		basedOn.setReference(ORDER_UUID);
+		request.setBasedOn(basedOn);
 		request.setIsSystemGeneratedTask(false);
 		
 		Task task = taskMapper.fromRequest(request);
@@ -79,7 +84,7 @@ public class TaskMapperTest {
 		assertNotNull(task.getFhirTask().getBasedOnReferences());
 		assertEquals(1, task.getFhirTask().getBasedOnReferences().size());
 		FhirReference ref = task.getFhirTask().getBasedOnReferences().iterator().next();
-		assertEquals(Order.class.getTypeName(), ref.getType());
+		assertEquals("ServiceRequest", ref.getType());
 		assertEquals(ORDER_UUID, ref.getReference());
 		assertEquals(ORDER_UUID, ref.getTargetUuid());
 	}
@@ -93,6 +98,7 @@ public class TaskMapperTest {
 		
 		FhirReference focusRef = new FhirReference();
 		focusRef.setTargetUuid(OBSERVATION_UUID);
+		focusRef.setType("Observation");
 		fhirTask.setFocusReference(focusRef);
 		
 		FhirTaskRequestedPeriod period = new FhirTaskRequestedPeriod();
@@ -101,7 +107,9 @@ public class TaskMapperTest {
 		
 		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, period));
 		
-		assertEquals(OBSERVATION_UUID, response.getObservationUuid());
+		assertNotNull(response.getFocus());
+		assertEquals(OBSERVATION_UUID, response.getFocus().getReference());
+		assertEquals("Observation", response.getFocus().getType());
 	}
 	
 	@Test
@@ -116,7 +124,7 @@ public class TaskMapperTest {
 		
 		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, period));
 		
-		assertNull(response.getObservationUuid());
+		assertNull(response.getFocus());
 	}
 	
 	@Test
