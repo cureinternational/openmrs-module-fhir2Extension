@@ -1,7 +1,6 @@
 package org.openmrs.module.fhirExtension.service;
 
 import org.openmrs.annotation.Authorized;
-import org.openmrs.module.fhir2.model.FhirTask;
 import org.openmrs.module.fhirExtension.model.Task;
 import org.openmrs.module.fhirExtension.model.TaskSearchRequest;
 import org.openmrs.module.fhirExtension.utils.PrivilegeConstants;
@@ -30,7 +29,4 @@ public interface TaskService {
 	
 	@Authorized({ PrivilegeConstants.GET_TASKS })
 	List<Task> searchTasks(TaskSearchRequest taskSearchRequest);
-	
-	@Authorized({ PrivilegeConstants.GET_TASKS })
-	List<FhirTask> getTasksByObservationUuids(List<String> observationUuids);
 }

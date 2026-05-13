@@ -15,13 +15,10 @@ import org.openmrs.module.fhirExtension.model.TaskSearchRequest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class TaskServiceImplTest {
@@ -143,19 +140,5 @@ public class TaskServiceImplTest {
 
 		verify(taskDao, times(1)).searchTasks(searchRequest);
 
-	}
-	
-	@Test
-	public void testGetTasksByObservationUuids_shouldDelegateToFhirTaskDaoWithFocusParam() {
-		String observationUuid = UUID.randomUUID().toString();
-		FhirTask fhirTask = new FhirTask();
-		List<FhirTask> expected = Collections.singletonList(fhirTask);
-		
-		when(fhirTaskDao.getSearchResults(any())).thenReturn(expected);
-		
-		List<FhirTask> result = taskService.getTasksByObservationUuids(Collections.singletonList(observationUuid));
-		
-		verify(fhirTaskDao, times(1)).getSearchResults(any());
-		assertEquals(1, result.size());
 	}
 }

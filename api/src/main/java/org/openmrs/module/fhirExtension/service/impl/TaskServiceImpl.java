@@ -1,12 +1,7 @@
 package org.openmrs.module.fhirExtension.service.impl;
 
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.openmrs.api.VisitService;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.model.FhirTask;
 import org.openmrs.module.fhirExtension.dao.TaskDao;
 import org.openmrs.module.fhirExtension.dao.TaskRequestedPeriodDao;
@@ -75,16 +70,6 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public List<Task> searchTasks(TaskSearchRequest taskSearchRequest) {
 		return taskDao.searchTasks(taskSearchRequest);
-	}
-	
-	@Override
-	public List<FhirTask> getTasksByObservationUuids(List<String> observationUuids) {
-		ReferenceOrListParam orList = new ReferenceOrListParam();
-		observationUuids.forEach(uuid -> orList.add(new ReferenceParam(FhirConstants.OBSERVATION, null, uuid)));
-		ReferenceAndListParam focusParam = new ReferenceAndListParam().addAnd(orList);
-		SearchParameterMap searchMap = new SearchParameterMap()
-		        .addParameter(FhirConstants.FOCUS_REFERENCE_SEARCH_HANDLER, focusParam);
-		return fhirTaskDao.getSearchResults(searchMap);
 	}
 	
 	public void setVisitService(VisitService visitService) {
