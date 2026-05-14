@@ -78,6 +78,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: omod/target/fhir2Extension-1.4.0.ipd-SNAPSHOT.omod
-          asset_name: fhir2Extension-1.4.0.ipd-SNAPSHOT.omod
+          asset_path: omod/target/fhir2-extension-1.4.0.ipd-SNAPSHOT.omod
+          asset_name: fhir2-extension-1.4.0.ipd-SNAPSHOT.omod
           asset_content_type: application/octet-stream
