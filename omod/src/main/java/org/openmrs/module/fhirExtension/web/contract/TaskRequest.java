@@ -34,4 +34,8 @@ public class TaskRequest {
 	
 	private Boolean isSystemGeneratedTask = false;
 	
+	private TaskFhirReference focus;
+	
+	private TaskFhirReference basedOn;
+	
 }

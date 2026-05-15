@@ -68,7 +68,7 @@ public class TaskController extends BaseRestController {
 	public ResponseEntity<Object> getTasks(@RequestParam(value = "startTime") Long startTime,
 										   @RequestParam(value = "endTime") Long endTime,
 										   @RequestParam(value = "visitUuid", required = false) String visitUuid,
-										   @RequestParam(value = "patientUuids", required = false) List<String> patientUuids) throws IOException {
+										   @RequestParam(value = "patientUuids", required = false) List<String> patientUuids) {
 		try {
 			if (visitUuid != null && !visitUuid.isEmpty()) {
 				List<Task> tasks = taskService.getTasksByVisitFilteredByTimeFrame(visitUuid, new Date(startTime), new Date(endTime));
