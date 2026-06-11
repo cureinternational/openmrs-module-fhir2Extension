@@ -18,6 +18,8 @@ import org.openmrs.module.fhirExtension.web.contract.TaskRequest;
 import org.openmrs.module.fhirExtension.web.contract.TaskResponse;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -110,6 +112,39 @@ public class TaskMapperTest {
 		assertNotNull(response.getFocus());
 		assertEquals(OBSERVATION_UUID, response.getFocus().getReference());
 		assertEquals("Observation", response.getFocus().getType());
+	}
+	
+	@Test
+	public void constructResponse_shouldIncludeBasedOnReferenceInResponse() {
+		FhirTask fhirTask = new FhirTask();
+		FhirReference forRef = new FhirReference();
+		forRef.setTargetUuid("visit-uuid");
+		fhirTask.setForReference(forRef);
+
+		FhirReference basedOnRef = new FhirReference();
+		basedOnRef.setTargetUuid(ORDER_UUID);
+		basedOnRef.setType("ServiceRequest");
+		Set<FhirReference> basedOnRefs = new HashSet<>();
+		basedOnRefs.add(basedOnRef);
+		fhirTask.setBasedOnReferences(basedOnRefs);
+
+		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, null));
+
+		assertNotNull(response.getBasedOn());
+		assertEquals(ORDER_UUID, response.getBasedOn().getReference());
+		assertEquals("ServiceRequest", response.getBasedOn().getType());
+	}
+	
+	@Test
+	public void constructResponse_shouldNotFailWhenBasedOnReferencesAbsent() {
+		FhirTask fhirTask = new FhirTask();
+		FhirReference forRef = new FhirReference();
+		forRef.setTargetUuid("visit-uuid");
+		fhirTask.setForReference(forRef);
+		
+		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, null));
+		
+		assertNull(response.getBasedOn());
 	}
 	
 	@Test

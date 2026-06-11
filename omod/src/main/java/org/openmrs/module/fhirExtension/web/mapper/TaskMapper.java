@@ -136,6 +136,13 @@ public class TaskMapper {
 			focus.setType(task.getFhirTask().getFocusReference().getType());
 			response.setFocus(focus);
 		}
+		if (task.getFhirTask().getBasedOnReferences() != null && !task.getFhirTask().getBasedOnReferences().isEmpty()) {
+			FhirReference basedOnRef = task.getFhirTask().getBasedOnReferences().iterator().next();
+			TaskFhirReference basedOn = new TaskFhirReference();
+			basedOn.setReference(basedOnRef.getTargetUuid());
+			basedOn.setType(basedOnRef.getType());
+			response.setBasedOn(basedOn);
+		}
 		return response;
 	}
 	

@@ -40,4 +40,6 @@ public class TaskResponse {
 	private String comment;
 	
 	private TaskFhirReference focus;
+	
+	private TaskFhirReference basedOn;
 }
