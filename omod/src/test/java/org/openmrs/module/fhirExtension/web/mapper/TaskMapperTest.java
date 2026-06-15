@@ -99,7 +99,7 @@ public class TaskMapperTest {
 		fhirTask.setForReference(forRef);
 		
 		FhirReference focusRef = new FhirReference();
-		focusRef.setTargetUuid(OBSERVATION_UUID);
+		focusRef.setReference("Observation/" + OBSERVATION_UUID);
 		focusRef.setType("Observation");
 		fhirTask.setFocusReference(focusRef);
 		
@@ -110,7 +110,7 @@ public class TaskMapperTest {
 		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, period));
 		
 		assertNotNull(response.getFocus());
-		assertEquals(OBSERVATION_UUID, response.getFocus().getReference());
+		assertEquals("Observation/" + OBSERVATION_UUID, response.getFocus().getReference());
 		assertEquals("Observation", response.getFocus().getType());
 	}
 	
@@ -122,7 +122,7 @@ public class TaskMapperTest {
 		fhirTask.setForReference(forRef);
 
 		FhirReference basedOnRef = new FhirReference();
-		basedOnRef.setTargetUuid(ORDER_UUID);
+		basedOnRef.setReference("ServiceRequest/" + ORDER_UUID);
 		basedOnRef.setType("ServiceRequest");
 		Set<FhirReference> basedOnRefs = new HashSet<>();
 		basedOnRefs.add(basedOnRef);
@@ -131,7 +131,7 @@ public class TaskMapperTest {
 		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, null));
 
 		assertNotNull(response.getBasedOn());
-		assertEquals(ORDER_UUID, response.getBasedOn().getReference());
+		assertEquals("ServiceRequest/" + ORDER_UUID, response.getBasedOn().getReference());
 		assertEquals("ServiceRequest", response.getBasedOn().getType());
 	}
 	
@@ -145,6 +145,41 @@ public class TaskMapperTest {
 		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, null));
 		
 		assertNull(response.getBasedOn());
+	}
+	
+	@Test
+	public void constructResponse_shouldNotSetBasedOnWhenReferencesSetIsEmpty() {
+		FhirTask fhirTask = new FhirTask();
+		FhirReference forRef = new FhirReference();
+		forRef.setTargetUuid("visit-uuid");
+		fhirTask.setForReference(forRef);
+		fhirTask.setBasedOnReferences(new HashSet<>());
+
+		TaskResponse response = taskMapper.constructResponse(new Task(fhirTask, null));
+
+		assertNull(response.getBasedOn());
+	}
+	
+	@Test
+	public void constructResponse_shouldReturnBasedOnReferenceSetDuringFromRequest() {
+		TaskRequest request = new TaskRequest();
+		TaskFhirReference basedOn = new TaskFhirReference();
+		basedOn.setType("ServiceRequest");
+		basedOn.setReference("ServiceRequest/" + ORDER_UUID);
+		request.setBasedOn(basedOn);
+		request.setIsSystemGeneratedTask(false);
+		
+		Task task = taskMapper.fromRequest(request);
+		
+		// forReference required by constructResponse — set it since no patient/visit in request
+		FhirReference forRef = new FhirReference();
+		forRef.setTargetUuid("visit-uuid");
+		task.getFhirTask().setForReference(forRef);
+		
+		TaskResponse response = taskMapper.constructResponse(task);
+		
+		assertNotNull(response.getBasedOn());
+		assertEquals("ServiceRequest/" + ORDER_UUID, response.getBasedOn().getReference());
 	}
 	
 	@Test
