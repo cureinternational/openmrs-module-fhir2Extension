@@ -93,7 +93,6 @@ public class TaskMapper {
 			FhirReference focusReference = new FhirReference();
 			focusReference.setType(taskRequest.getFocus().getType());
 			focusReference.setReference(taskRequest.getFocus().getReference());
-			focusReference.setTargetUuid(taskRequest.getFocus().getReference());
 			fhirTask.setFocusReference(focusReference);
 		}
 
@@ -101,7 +100,6 @@ public class TaskMapper {
 			FhirReference basedOnReference = new FhirReference();
 			basedOnReference.setType(taskRequest.getBasedOn().getType());
 			basedOnReference.setReference(taskRequest.getBasedOn().getReference());
-			basedOnReference.setTargetUuid(taskRequest.getBasedOn().getReference());
 			Set<FhirReference> basedOnRefs = fhirTask.getBasedOnReferences() != null
 			        ? fhirTask.getBasedOnReferences()
 			        : new HashSet<>();
