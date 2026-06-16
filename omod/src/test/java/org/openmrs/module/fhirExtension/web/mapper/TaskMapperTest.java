@@ -47,7 +47,7 @@ public class TaskMapperTest {
 		TaskRequest request = new TaskRequest();
 		TaskFhirReference focus = new TaskFhirReference();
 		focus.setType("Observation");
-		focus.setReference(OBSERVATION_UUID);
+		focus.setReference("Observation/" + OBSERVATION_UUID);
 		request.setFocus(focus);
 		request.setIsSystemGeneratedTask(false);
 		
@@ -56,7 +56,7 @@ public class TaskMapperTest {
 		FhirReference focusRef = task.getFhirTask().getFocusReference();
 		assertNotNull(focusRef);
 		assertEquals("Observation", focusRef.getType());
-		assertEquals(OBSERVATION_UUID, focusRef.getReference());
+		assertEquals("Observation/" + OBSERVATION_UUID, focusRef.getReference());
 		assertEquals(OBSERVATION_UUID, focusRef.getTargetUuid());
 	}
 	
@@ -75,7 +75,7 @@ public class TaskMapperTest {
 		TaskRequest request = new TaskRequest();
 		TaskFhirReference basedOn = new TaskFhirReference();
 		basedOn.setType("ServiceRequest");
-		basedOn.setReference(ORDER_UUID);
+		basedOn.setReference("ServiceRequest/" + ORDER_UUID);
 		request.setBasedOn(basedOn);
 		request.setIsSystemGeneratedTask(false);
 		
@@ -85,7 +85,7 @@ public class TaskMapperTest {
 		assertEquals(1, task.getFhirTask().getBasedOnReferences().size());
 		FhirReference ref = task.getFhirTask().getBasedOnReferences().iterator().next();
 		assertEquals("ServiceRequest", ref.getType());
-		assertEquals(ORDER_UUID, ref.getReference());
+		assertEquals("ServiceRequest/" + ORDER_UUID, ref.getReference());
 		assertEquals(ORDER_UUID, ref.getTargetUuid());
 	}
 	
