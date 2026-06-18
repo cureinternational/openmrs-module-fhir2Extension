@@ -132,9 +132,16 @@ public class TaskMapper {
 		response.setComment(task.getFhirTask().getComment());
 		if (task.getFhirTask().getFocusReference() != null) {
 			TaskFhirReference focus = new TaskFhirReference();
-			focus.setReference(task.getFhirTask().getFocusReference().getTargetUuid());
+			focus.setReference(task.getFhirTask().getFocusReference().getReference());
 			focus.setType(task.getFhirTask().getFocusReference().getType());
 			response.setFocus(focus);
+		}
+		if (task.getFhirTask().getBasedOnReferences() != null && !task.getFhirTask().getBasedOnReferences().isEmpty()) {
+			FhirReference basedOnRef = task.getFhirTask().getBasedOnReferences().iterator().next();
+			TaskFhirReference basedOn = new TaskFhirReference();
+			basedOn.setReference(basedOnRef.getReference());
+			basedOn.setType(basedOnRef.getType());
+			response.setBasedOn(basedOn);
 		}
 		return response;
 	}
