@@ -13,6 +13,8 @@ import org.openmrs.module.fhirExtension.web.contract.TaskResponse;
 import org.openmrs.module.fhirExtension.web.contract.TaskUpdateRequest;
 import org.openmrs.module.fhirExtension.web.mapper.TaskMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,27 @@ public class TaskController extends BaseRestController {
 		}
 		catch (RuntimeException ex){
 			log.error("Runtime error while trying to create new task", ex);
+			return new ResponseEntity<>(RestUtil.wrapErrorResponse(ex, ex.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Object> saveTasks(@RequestBody String requestBody) throws IOException {
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			List<TaskRequest> taskRequests = objectMapper.readValue(requestBody, new TypeReference<List<TaskRequest>>(){});
+			
+			if (taskRequests == null || taskRequests.isEmpty()) {
+				throw new IllegalArgumentException("Task request list cannot be empty");
+			}
+			List<Task> tasks = taskRequests.stream().map(taskMapper::fromRequest).collect(Collectors.toList());
+			taskService.saveTask(tasks);
+			return new ResponseEntity<>(tasks.stream().map(taskMapper::constructResponse).collect(Collectors.toList()),
+					HttpStatus.OK);
+		}
+		catch (RuntimeException ex) {
+			log.error("Runtime error while trying to create bulk tasks", ex);
 			return new ResponseEntity<>(RestUtil.wrapErrorResponse(ex, ex.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 	}
