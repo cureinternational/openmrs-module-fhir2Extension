@@ -1,31 +1,39 @@
 package org.openmrs.module.fhirExtension.web;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.model.FhirTask;
+import org.openmrs.module.webservices.rest.SimpleObject;
+import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.openmrs.module.fhirExtension.model.Task;
 import org.openmrs.module.fhirExtension.service.TaskService;
 import org.openmrs.module.fhirExtension.web.contract.TaskRequest;
 import org.openmrs.module.fhirExtension.web.contract.TaskResponse;
 import org.openmrs.module.fhirExtension.web.mapper.TaskMapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Context.class, RestUtil.class })
+@PowerMockIgnore("javax.management.*")
 public class TaskControllerTest {
 	
 	@Mock
@@ -37,8 +45,15 @@ public class TaskControllerTest {
 	@InjectMocks
 	private TaskController taskController;
 	
+	@Before
+	public void setUp() {
+		PowerMockito.mockStatic(Context.class);
+		PowerMockito.mockStatic(RestUtil.class);
+		when(RestUtil.wrapErrorResponse(any(Exception.class), any())).thenReturn(new SimpleObject());
+	}
+	
 	@Test
-	public void saveTasks_shouldCreateTasksInBulkAndReturnResponses() throws IOException {
+	public void saveTasks_shouldCreateTasksInBulkAndReturnResponses() {
 		TaskRequest request1 = new TaskRequest();
 		request1.setName("Task 1");
 		TaskRequest request2 = new TaskRequest();
@@ -60,9 +75,7 @@ public class TaskControllerTest {
 		when(taskMapper.constructResponse(task1)).thenReturn(response1);
 		when(taskMapper.constructResponse(task2)).thenReturn(response2);
 		
-		ObjectMapper objectMapper = new ObjectMapper();
-		String requestBody = objectMapper.writeValueAsString(requests);
-		ResponseEntity<Object> responseEntity = taskController.saveTasks(requestBody);
+		ResponseEntity<Object> responseEntity = taskController.saveTasks(requests);
 		
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 		List<?> responseBody = (List<?>) responseEntity.getBody();
@@ -73,14 +86,35 @@ public class TaskControllerTest {
 	}
 	
 	@Test
-	public void saveTasks_shouldReturnBadRequestWhenRuntimeExceptionOccurs() throws IOException {
+	public void saveTasks_shouldReturnBadRequestWhenRuntimeExceptionOccurs() {
 		when(taskMapper.fromRequest(any(TaskRequest.class))).thenThrow(new RuntimeException("mapping failed"));
 		
-		ObjectMapper objectMapper = new ObjectMapper();
-		String requestBody = objectMapper.writeValueAsString(Arrays.asList(new TaskRequest()));
-		ResponseEntity<Object> responseEntity = taskController.saveTasks(requestBody);
+		ResponseEntity<Object> responseEntity = taskController.saveTasks(Arrays.asList(new TaskRequest()));
 		
 		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-		assertTrue(responseEntity.getBody() != null);
+		assertNotNull(responseEntity.getBody());
+	}
+	
+	@Test
+	public void saveTasks_shouldReturnBadRequestForEmptyList() {
+		ResponseEntity<Object> responseEntity = taskController.saveTasks(Collections.emptyList());
+		
+		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+		assertNotNull(responseEntity.getBody());
+	}
+	
+	@Test
+	public void saveTasks_shouldReturnBadRequestWhenServiceThrowsException() {
+		TaskRequest request = new TaskRequest();
+		request.setName("Task 1");
+		Task task = new Task();
+		task.setFhirTask(new FhirTask());
+		when(taskMapper.fromRequest(request)).thenReturn(task);
+		when(taskService.saveTask(any(List.class))).thenThrow(new RuntimeException("db error"));
+		
+		ResponseEntity<Object> responseEntity = taskController.saveTasks(Arrays.asList(request));
+		
+		assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+		assertNotNull(responseEntity.getBody());
 	}
 }
