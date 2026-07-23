@@ -71,8 +71,8 @@ public class TaskController extends BaseRestController {
 				throw new IllegalArgumentException("Task request list cannot be empty");
 			}
 			List<Task> tasks = taskRequests.stream().map(taskMapper::fromRequest).collect(Collectors.toList());
-			List<TaskResponse> responses = tasks.stream().map(taskMapper::constructResponse).collect(Collectors.toList());
-			taskService.saveTask(tasks);
+			List<Task> savedTasks = taskService.saveTask(tasks);
+			List<TaskResponse> responses = savedTasks.stream().map(taskMapper::constructResponse).collect(Collectors.toList());
 			return new ResponseEntity<>(responses, HttpStatus.OK);
 		}
 		catch (RuntimeException ex) {

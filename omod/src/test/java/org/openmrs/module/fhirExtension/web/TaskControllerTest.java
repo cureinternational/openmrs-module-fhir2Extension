@@ -72,6 +72,7 @@ public class TaskControllerTest {
 		
 		when(taskMapper.fromRequest(request1)).thenReturn(task1);
 		when(taskMapper.fromRequest(request2)).thenReturn(task2);
+		when(taskService.saveTask(Arrays.asList(task1, task2))).thenReturn(Arrays.asList(task1, task2));
 		when(taskMapper.constructResponse(task1)).thenReturn(response1);
 		when(taskMapper.constructResponse(task2)).thenReturn(response2);
 		
