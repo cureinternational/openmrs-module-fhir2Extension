@@ -63,6 +63,24 @@ public class TaskController extends BaseRestController {
 		}
 	}
 	
+	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Object> saveTasks(@Valid @RequestBody List<TaskRequest> taskRequests) {
+		try {
+			if (taskRequests.isEmpty()) {
+				throw new IllegalArgumentException("Task request list cannot be empty");
+			}
+			List<Task> tasks = taskRequests.stream().map(taskMapper::fromRequest).collect(Collectors.toList());
+			List<Task> savedTasks = taskService.saveTask(tasks);
+			List<TaskResponse> responses = savedTasks.stream().map(taskMapper::constructResponse).collect(Collectors.toList());
+			return new ResponseEntity<>(responses, HttpStatus.OK);
+		}
+		catch (RuntimeException ex) {
+			log.error("Runtime error while trying to create bulk tasks", ex);
+			return new ResponseEntity<>(RestUtil.wrapErrorResponse(ex, ex.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, params = {"startTime", "endTime"})
 	@ResponseBody
 	public ResponseEntity<Object> getTasks(@RequestParam(value = "startTime") Long startTime,
