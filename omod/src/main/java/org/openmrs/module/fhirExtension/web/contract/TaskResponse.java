@@ -17,8 +17,6 @@ public class TaskResponse {
 	
 	private String name;
 	
-	private String patientUuid;
-	
 	private Date requestedStartTime;
 	
 	private Date requestedEndTime;
@@ -42,4 +40,6 @@ public class TaskResponse {
 	private TaskFhirReference focus;
 	
 	private TaskFhirReference basedOn;
+	
+	private TaskFhirReference forReference;
 }

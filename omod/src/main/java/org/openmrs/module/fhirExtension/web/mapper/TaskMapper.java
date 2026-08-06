@@ -47,32 +47,35 @@ public class TaskMapper {
 	
 	private static final String ALL_TASK_TYPE = "All Task Types";
 	
+	private static final String FHIR_REFERENCE_SEPARATOR = "/";
+	
 	public Task fromRequest(TaskRequest taskRequest) {
-		
+
 		Task task = new Task();
 		FhirTask fhirTask = new FhirTask();
 		fhirTask.setName(taskRequest.getName());
 		fhirTask.setTaskCode(getConceptForTaskType(taskRequest.getTaskType()));
-		if (taskRequest.getPatientUuid() != null) {
-			Visit activeVisit = visitService.getActiveVisitsByPatient(
-			    patientService.getPatientByUuid(taskRequest.getPatientUuid())).get(0);
+
+		String patientUuid = taskRequest.getPatientUuid();
+		if (patientUuid == null && taskRequest.getVisitUuid() != null) {
+			Visit visit = visitService.getVisitByUuid(taskRequest.getVisitUuid());
+			if (visit != null && visit.getPatient() != null) {
+				patientUuid = visit.getPatient().getUuid();
+			}
+		}
+
+		if (patientUuid != null) {
 			FhirReference forReference = new FhirReference();
-			forReference.setType(Visit.class.getTypeName());
-			forReference.setReference(Visit.class.getTypeName() + "/" + activeVisit.getUuid());
-			forReference.setTargetUuid(activeVisit.getUuid());
-			fhirTask.setForReference(forReference);
-		} else if (taskRequest.getVisitUuid() != null) {
-			FhirReference forReference = new FhirReference();
-			forReference.setType(Visit.class.getTypeName());
-			forReference.setReference(Visit.class.getTypeName() + "/" + taskRequest.getVisitUuid());
-			forReference.setTargetUuid(taskRequest.getVisitUuid());
+			forReference.setType(Patient.class.getTypeName());
+			forReference.setReference(Patient.class.getTypeName() + FHIR_REFERENCE_SEPARATOR + patientUuid);
+			forReference.setTargetUuid(patientUuid);
 			fhirTask.setForReference(forReference);
 		}
 		
 		if (taskRequest.getEncounterUuid() != null) {
 			FhirReference encounterReference = new FhirReference();
 			encounterReference.setType(Encounter.class.getTypeName());
-			encounterReference.setReference(Encounter.class.getTypeName() + "/" + taskRequest.getEncounterUuid());
+			encounterReference.setReference(Encounter.class.getTypeName() + FHIR_REFERENCE_SEPARATOR + taskRequest.getEncounterUuid());
 			encounterReference.setTargetUuid(taskRequest.getEncounterUuid());
 			fhirTask.setEncounterReference(encounterReference);
 		}
@@ -120,7 +123,14 @@ public class TaskMapper {
 		response.setUuid(task.getFhirTask().getUuid());
 		response.setStatus(task.getFhirTask().getStatus());
 		response.setIntent(task.getFhirTask().getIntent());
-		response.setPatientUuid(task.getFhirTask().getForReference().getTargetUuid());
+		
+		FhirReference forReference = task.getFhirTask().getForReference();
+		if (forReference != null) {
+			TaskFhirReference forRef = new TaskFhirReference();
+			forRef.setReference(forReference.getReference());
+			forRef.setType(forReference.getType());
+			response.setForReference(forRef);
+		}
 		if (task.getFhirTaskRequestedPeriod() != null) {
 			response.setRequestedStartTime(task.getFhirTaskRequestedPeriod().getRequestedStartTime());
 			response.setRequestedEndTime(task.getFhirTaskRequestedPeriod().getRequestedEndTime());
