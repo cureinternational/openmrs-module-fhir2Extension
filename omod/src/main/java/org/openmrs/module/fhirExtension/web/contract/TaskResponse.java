@@ -1,5 +1,6 @@
 package org.openmrs.module.fhirExtension.web.contract;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,5 +42,6 @@ public class TaskResponse {
 	
 	private TaskFhirReference basedOn;
 	
+	@JsonProperty("for")
 	private TaskFhirReference forReference;
 }
