@@ -48,7 +48,7 @@ public class TaskMapper {
 	private static final String ALL_TASK_TYPE = "All Task Types";
 	
 	public Task fromRequest(TaskRequest taskRequest) {
-		
+
 		Task task = new Task();
 		FhirTask fhirTask = new FhirTask();
 		fhirTask.setName(taskRequest.getName());
@@ -68,7 +68,7 @@ public class TaskMapper {
 			forReference.setTargetUuid(taskRequest.getVisitUuid());
 			fhirTask.setForReference(forReference);
 		}
-		
+
 		if (taskRequest.getEncounterUuid() != null) {
 			FhirReference encounterReference = new FhirReference();
 			encounterReference.setType(Encounter.class.getTypeName());
@@ -76,11 +76,11 @@ public class TaskMapper {
 			encounterReference.setTargetUuid(taskRequest.getEncounterUuid());
 			fhirTask.setEncounterReference(encounterReference);
 		}
-		
+
 		fhirTask.setStatus(taskRequest.getStatus());
 		fhirTask.setIntent(taskRequest.getIntent());
 		fhirTask.setComment(taskRequest.getComment());
-		
+
 		if (taskRequest.getRequestedStartTime() != null || taskRequest.getRequestedEndTime() != null) {
 			FhirTaskRequestedPeriod fhirTaskRequestedPeriod = new FhirTaskRequestedPeriod();
 			fhirTaskRequestedPeriod.setTask(fhirTask);
@@ -88,7 +88,7 @@ public class TaskMapper {
 			fhirTaskRequestedPeriod.setRequestedEndTime(taskRequest.getRequestedEndTime());
 			task.setFhirTaskRequestedPeriod(fhirTaskRequestedPeriod);
 		}
-		
+
 		if (taskRequest.getFocus() != null) {
 			FhirReference focusReference = new FhirReference();
 			focusReference.setType(taskRequest.getFocus().getType());
@@ -120,7 +120,13 @@ public class TaskMapper {
 		response.setUuid(task.getFhirTask().getUuid());
 		response.setStatus(task.getFhirTask().getStatus());
 		response.setIntent(task.getFhirTask().getIntent());
-		response.setPatientUuid(task.getFhirTask().getForReference().getTargetUuid());
+		FhirReference forReference = task.getFhirTask().getForReference();
+		if (forReference != null) {
+			TaskFhirReference forRef = new TaskFhirReference();
+			forRef.setReference(forReference.getReference());
+			forRef.setType(forReference.getType());
+			response.setForReference(forRef);
+		}
 		if (task.getFhirTaskRequestedPeriod() != null) {
 			response.setRequestedStartTime(task.getFhirTaskRequestedPeriod().getRequestedStartTime());
 			response.setRequestedEndTime(task.getFhirTaskRequestedPeriod().getRequestedEndTime());

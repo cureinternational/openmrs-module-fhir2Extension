@@ -17,6 +17,10 @@ import org.openmrs.module.fhirExtension.model.Task;
 import org.openmrs.module.fhirExtension.web.contract.TaskRequest;
 import org.openmrs.module.fhirExtension.web.contract.TaskResponse;
 
+import org.openmrs.Patient;
+import org.openmrs.Visit;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +28,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskMapperTest {
@@ -208,5 +213,43 @@ public class TaskMapperTest {
 		
 		assertNull(response.getRequestedStartTime());
 		assertNull(response.getRequestedEndTime());
+	}
+	
+	@Test
+	public void fromRequest_shouldSetForReferenceWhenVisitUuidIsProvided() {
+		TaskRequest request = new TaskRequest();
+		request.setVisitUuid("visit-uuid-1234");
+		request.setIsSystemGeneratedTask(false);
+		
+		Task task = taskMapper.fromRequest(request);
+		TaskResponse response = taskMapper.constructResponse(task);
+		
+		assertNotNull(response.getForReference());
+		assertEquals(Visit.class.getTypeName(), response.getForReference().getType());
+		assertEquals(Visit.class.getTypeName() + "/visit-uuid-1234", response.getForReference().getReference());
+	}
+	
+	@Test
+	public void fromRequest_shouldSetForReferenceFromActiveVisitWhenPatientUuidIsProvided() {
+		String patientUuid = "patient-uuid-1234";
+		String visitUuid = "visit-uuid-5678";
+		
+		Patient patient = new Patient();
+		Visit activeVisit = new Visit();
+		activeVisit.setUuid(visitUuid);
+		
+		when(patientService.getPatientByUuid(patientUuid)).thenReturn(patient);
+		when(visitService.getActiveVisitsByPatient(patient)).thenReturn(Arrays.asList(activeVisit));
+		
+		TaskRequest request = new TaskRequest();
+		request.setPatientUuid(patientUuid);
+		request.setIsSystemGeneratedTask(false);
+		
+		Task task = taskMapper.fromRequest(request);
+		TaskResponse response = taskMapper.constructResponse(task);
+		
+		assertNotNull(response.getForReference());
+		assertEquals(Visit.class.getTypeName(), response.getForReference().getType());
+		assertEquals(Visit.class.getTypeName() + "/" + visitUuid, response.getForReference().getReference());
 	}
 }
